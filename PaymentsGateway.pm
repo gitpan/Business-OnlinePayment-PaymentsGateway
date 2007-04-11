@@ -6,12 +6,8 @@ use Business::OnlinePayment;
 use Net::SSLeay qw(sslcat);
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $DEBUG);
 
-require Exporter;
-
-@ISA = qw( Exporter AutoLoader Business::OnlinePayment);
-@EXPORT = qw();
-@EXPORT_OK = qw();
-$VERSION = '0.01';
+@ISA = qw( Business::OnlinePayment );
+$VERSION = '0.02';
 
 $DEBUG = 0;
 
@@ -70,7 +66,6 @@ sub set_defaults {
   my $self = shift;
   $self->server('paymentsgateway.net');
   $self->port( 5050 );
-  $self->build_subs(qw(test_transaction));
 }
 
 sub map_fields {
@@ -92,6 +87,7 @@ sub map_fields {
     'discover'         => 10,
     'cc'               => 10,
     'check'            => 20,
+    'echeck'           => 20,
   );
 
   #pg_type/action = action + type  
@@ -175,7 +171,7 @@ sub submit {
     )
   );
 
-  if ( $content{'type'} =~ /^check$/i ) {
+  if ( $content{'type'} =~ /^e?check$/i ) {
     push @fields, qw( ecom_payment_check_trn
                       ecom_payment_check_account
                       ecom_payment_check_account_type );
@@ -184,7 +180,7 @@ sub submit {
   }
 
   my $request = join("\n", map { "$_=". $content{$_} }
-                           grep { $content{$_} ne '' }
+                           grep { defined($content{$_}) && $content{$_} ne '' }
                            @fields                     ).
                 "\nendofdata\n";
 
@@ -259,7 +255,7 @@ For detailed information see L<Business::OnlinePayment>.
 
 =head1 NOTE
 
-This module only implements 'CHECK' (ACH) transactions at this time.  Credit
+This module only implements 'ECHECK' (ACH) transactions at this time.  Credit
 card transactions are not (yet) supported.
 
 =head1 COMPATIBILITY

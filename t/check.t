@@ -1,4 +1,8 @@
-BEGIN { $| = 1; print "1..1\n"; }
+#BEGIN { $| = 1; print "1..1\n"; }
+use Test::More tests => 1;
+
+SKIP: {
+  skip "test account no longer available", 1;
 
 use Business::OnlinePayment;
 
@@ -27,4 +31,6 @@ if($ctx->is_success()) {
 } else {
     warn $ctx->result_code. ': '. $ctx->error_message();
     print "not ok 1 (".$ctx->error_message().")\n";
+}
+
 }
